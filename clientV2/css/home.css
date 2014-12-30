@@ -22,6 +22,17 @@ body
     padding-top: 4px;
 }
 
+#line
+{
+    width: 600px;
+    height: 300px;
+    border: 3px solid #005865;
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 20px;
+    border-radius: 200px;   
+}
+
 .mainttitle
 {
     font-size: 48px;
@@ -116,25 +127,36 @@ body
 {
     position: absolute;
     padding: 10px 20px;
-    background-color: #3D4342;
+    background-color: #52584e;
     opacity: 0.7;
     border-radius: 10px;
-    color: #cdccc4;
+    color: rgb(205, 204, 196);
+    border: 1px solid rgb(42, 52, 39);
+    box-shadow: 5px 5px 5px #000;
+    z-index: 1;
     border: 1px solid #2A3427;
-    box-shadow: 5px 5px 5px black;
+    opacity: 1;
+    color: #CDCCC4;
+    font-family: helvetica;
+    font-size: 15px;
+    width: 100px;
+    text-align: center;
 }
 
 .fichas
 {
     display: block;
     text-align: center;
-    color: #FFEA00;
-    text-shadow: 1px 1px black;
+    background: none repeat scroll 0% 0% rgb(61, 67, 66);
+    border-radius: 4px;
+    padding: 5px;
+    border: 1px solid black;
+    box-shadow: inset 0 0 10px #000;
 }
 
 #vcard1
 {
-    margin-left: 170px;
+    margin-left: 145px;
     margin-top: -50px;
 }
 
@@ -152,7 +174,7 @@ body
 
 #vcard4
 {
-    margin-top: 220px;
+    margin-top: 230px;
     margin-left: 580px;
 }
 
@@ -164,20 +186,20 @@ body
 
 #vcard6
 {
-    margin-left: 170px;
+    margin-left: 145px;
     margin-top: 340px;
 }
 
 #vcard7
 {
-    margin-left: -30px;
-    margin-top: 220px;
+    margin-left: -75px;
+    margin-top: 230px;
 }
 
 #vcard8
 {
-    margin-left: -30px;
     margin-top: 50px;
+    margin-left: -75px;
 }
 
 .resalt
@@ -226,12 +248,13 @@ body
     height: 100%;
     background-color: black;
     opacity: 0.8;
-    
+    z-index: 2;
 }
 
 #panel
 {
     display: block;
+    z-index: 3;
 }
 
 .panel
@@ -272,7 +295,7 @@ body
 .cards
 {
     width: 70px;
-    margin-left: -10px;
+    margin-left: 35px;
 }
 
 #cards1, #cards2, #cards3, #cards4, #cards5, #cards6, #cards7, #cards8
@@ -324,8 +347,14 @@ body
     border-radius: 4px;
     box-shadow: 3px 3px 4px black;
     display: inline-block;
-    margin-left: 5px;
     text-align: center;
+    margin-left: -3px;
+    transform: rotate(9deg);
+}
+
+.cards .card1
+{
+    transform: rotate(-9deg);
 }
 
 .retirado
@@ -364,21 +393,111 @@ body
 
 .apuesta
 {
-    background-color: white;
+    background-color: #64A93A;
     height: 15px;
     width: 15px;
-    border: 1px dashed red;
-    box-shadow: 1px 1px 1px white;
+    border: 2px dashed #FFF;
+    box-shadow: 1px 1px 5px #000;
     border-radius: 15px;
-    color: red;
+    color: #FFF;
     text-align: center;
     padding: 2px;
     position: absolute;
     display: none;
+    margin-top: 35px;
+    padding-bottom: 4px;
+}
+
+.Rinverse
+{
+    margin-left: 135px;
+    margin-top: -30px;
+}
+
+.Tinverse
+{
+    margin-left: 45px;
+    margin-top: -105px;
+}
+
+.Linverse
+{
+    margin-top: -35px;
+    margin-left: -55px;
 }
 
 .turn
 {
     border: 1px solid #F9FF00;
     box-shadow: 0px 0px 10px #FFEA00;
+}
+
+.panel1
+{
+    display: none;
+    position: fixed;
+    right: 20px;
+    background: none repeat scroll 0% 0% #282A2B;
+    margin-right: 20px;
+    padding: 10px;
+    bottom: 20px;
+    border-radius: 5px;
+    border-top: 1px solid rgb(79, 81, 82);
+    box-shadow: 0px 2px 2px black;
+}
+
+input[type=button]
+{
+    background: #4F5152;
+    border: none;
+    border-top: 1px solid #838A75;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 3px;
+    color: #C3C8C4;
+    text-transform: uppercase;
+    font-weight: bold;
+    display: inline-block;
+    margin: 5px;
+}
+
+input[type=text]
+{
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px black inset;
+    border: medium none;
+    border: 1px solid black;
+    padding: 2px;
+    padding-left: 5px;
+}
+
+input[type=button]:hover
+{
+    color: #9F6213;
+}
+
+.panel1 .titt
+{
+    color: white;
+    padding: 5px;
+    margin-left: 10px;
+    text-shadow: 1px 1px 1px black;
+}
+
+.lineTit
+{
+    width: 250px;
+    height: 1px;
+    border-bottom: 1px solid #4F5152;
+    background-color: #000;
+    border-radius: 10px;
+    margin: 5px;
+}
+
+.apuestaPrice
+{
+    margin-left: -90px;
+    margin-top: 5px;
+    font-size: 10px;
 }

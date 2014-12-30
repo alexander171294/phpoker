@@ -10,65 +10,64 @@
     </head>    
     <body>
         <div id="game">
-            <div id="header">
-                <div class="tab2">PHPoker v0.1 Alpha - date 15/12/2014; rev. 8604</div>
-                <div class="mainttitle"><span class="redi title-pre">PHP</span><span class="title-pos">OKER</span></div>
-            </div>
             <div id="tableWrapper">
                 <div id="table">
                     <div id="marco"><div id="border-cero">
                         
                         <div id="notificator"></div>
-                        
+
                         <div id="vcard1" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards1"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer1" class="dealer">D</div>
-                            <div class="apuesta">$</div>
-                        </div>
-                        
-                        <div id="vcard3" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
-                            <div id="cards3"><div class="card1"></div><div class="card2"></div></div>
-                            <div id="dealer3" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard2" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards2"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer2" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta">$</div><div class="apuestaPrice"></div>
+                        </div>
+                        
+                        <div id="vcard3" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
+                            <div id="cards3"><div class="card1"></div><div class="card2"></div></div>
+                            <div id="dealer3" class="dealer">D</div>
+                            <div class="apuesta Linverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard4" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards4"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer4" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta Linverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard5" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards5"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer5" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta Tinverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard6" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards6"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer6" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta Tinverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard7" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards7"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer7" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta Rinverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="vcard8" class="vcard"><span class="name">Vac&iacute;o</span><span class="fichas">00000</span>
                             <div id="cards8"><div class="card1"></div><div class="card2"></div></div>
                             <div id="dealer8" class="dealer">D</div>
-                            <div class="apuesta">$</div>
+                            <div class="apuesta Rinverse">$</div><div class="apuestaPrice"></div>
                         </div>
                         
                         <div id="tinner">
+                            
+                            <div id="line"></div>
+                            
                             
                             <div id="CartasMesa">
                                 <div id="flop"><div id="card1" class="card1"></div><div id="card2" class="card1"></div><div  id="card3" class="card1"></div></div>
@@ -78,6 +77,8 @@
                             </div>
                             
                             <div id="watermark"><span class="shado2">PHPoker</span><span class="title" id="real">PHPoker</span></div>
+                            
+                            
                         </div>
                         
                     </div></div>
@@ -90,14 +91,15 @@
                 <input type="text" value="6768" name="port" id="port" /><br />
                 <input type="button" name="connect" id="connect" value="conectar"/>
             </div>
-            <div id="igualar" class="panel">
-                Opciones<br />
-                <input type="button" id="nir" value="No ir"/><br />
-                <input type="button" name="connect" id="iguala" value="Igualar "/><br />
+            <div id="igualar" class="panel1">
+                <span class="titt">Opciones</span>
+                <div class="lineTit"></div>
+                <input type="button" id="nir" value="No ir"/><input type="button" name="connect" id="iguala" value="Igualar "/><br />
                 <input type="text" value="10" name="aumentar" id="cantAument" /><input type="button" id="aumentar" value="Aumentar"/>
             </div>
-            <div id="pasar" class="panel">
-                Opciones<br />
+            <div id="pasar" class="panel1">
+                <span class="titt">Opciones</span>
+                <div class="lineTit"></div>
                 <input type="button" id="pasarBTN" value="Pasar"/><br />
                 <input type="text" value="10" id="cantAument2" /><input type="button" id="aumentar2" value="Aumentar"/>
             </div>

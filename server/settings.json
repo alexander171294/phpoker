@@ -1,0 +1,8 @@
+{
+    "fichasIniciales" : "2500",
+    "minimoJugadores" : "3",
+    "ciegaP" : "5",
+    "ciegaG" : "10",
+    "ciegaCrecimiento" : "2",
+    "ciegaManos" : "5"
+}

@@ -1,0 +1,8 @@
+{
+    "fichasIniciales" : "2500", FICHAS INICIALES DEL JUGADOR
+    "minimoJugadores" : "3", MINIMO DE JUGADORES NECESARIOS PARA EMPEZAR EL JUEGO
+    "ciegaP" : "5", CIEGA PEQUEÑA INICIAL
+    "ciegaG" : "10", CIEGA GRANDE INICIAL
+    "ciegaCrecimiento" : "2", MULTIPLICAR CIEGA EN LAS MANOS ESPECIFICADAS
+    "ciegaManos" : "5" CADA CUANTO AUMENTAR LAS CIEGAS
+}
