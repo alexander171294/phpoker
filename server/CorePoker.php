@@ -109,6 +109,8 @@ class CorePoker
     
     static private $inTable = array();
     
+    static private $eom = false;
+    
     static public function sit($identifier, $name, $id)
     {
         $ide = 'PvP'.$identifier;
@@ -152,7 +154,7 @@ class CorePoker
         self::Resend(json_encode(array('type' => 'notify', 'msg' => 'El juego comenzar&aacute; en 2 segundos.')));
         // mezclamos
         self::mezclar();
-        echo '...2...'.NL;
+        echo NL.'...2...'.NL;
         sleep(1);
         self::Resend(json_encode(array('type' => 'notify', 'msg' => 'El juego comenzar&aacute; en 1 segundo.')));
         // decidimos por qué posición comenzar 
@@ -171,8 +173,8 @@ class CorePoker
     static public function mezclar()
     {
         $aux = null;
-        echo '[--{Mezclando Cartas}-->'.NL;
-        /*
+        echo '[--{Mezclando Cartas}-->';
+        
         for($z = 0; $z<(count(self::$mazo)*2); $z++)
         {
             $rnd = mt_rand(0, count(self::$mazo)-1);
@@ -181,22 +183,24 @@ class CorePoker
             self::$mazo[$rnd] = self::$mazo[$rnd2];
             self::$mazo[$rnd2] = $aux;
             $aux = null;
-        }*/
+        }
+        /*  CARTAS FIJAS */
+        
         // primer persona
         self::$mazo[1] = array('palo' => PALO_CORAZON, 'valor' => 13);
         self::$mazo[2] = array('palo' => PALO_CORAZON, 'valor' => 12);
         // segunda persona
-        self::$mazo[3] = array('palo' => PALO_CORAZON, 'valor' => 2);
-        self::$mazo[4] = array('palo' => PALO_CORAZON, 'valor' => 8);
+        self::$mazo[3] = array('palo' => PALO_CORAZON, 'valor' => 14);
+        self::$mazo[4] = array('palo' => PALO_CORAZON, 'valor' => 5);
         // tercera persona
-        self::$mazo[5] = array('palo' => PALO_CORAZON, 'valor' => 3);
-        self::$mazo[6] = array('palo' => PALO_PICA, 'valor' => 3);
+        self::$mazo[5] = array('palo' => PALO_CORAZON, 'valor' => 9);
+        self::$mazo[6] = array('palo' => PALO_PICA, 'valor' => 5);
         // las 3 del flop
         // descarte
         self::$mazo[7] = array('palo' => PALO_CORAZON, 'valor' => 14);
         // tres primeras
-        self::$mazo[8] = array('palo' => PALO_TREBOL, 'valor' => 2);
-        self::$mazo[9] = array('palo' => PALO_TREBOL, 'valor' => 8);
+        self::$mazo[8] = array('palo' => PALO_TREBOL, 'valor' => 4);
+        self::$mazo[9] = array('palo' => PALO_TREBOL, 'valor' => 7);
         self::$mazo[10] = array('palo' => PALO_PICA, 'valor' => 8);
         // descarte
         self::$mazo[11] = array('palo' => PALO_CORAZON, 'valor' => 14);
@@ -205,7 +209,8 @@ class CorePoker
         // descarte
         self::$mazo[13] = array('palo' => PALO_CORAZON, 'valor' => 14);
         // river
-        self::$mazo[14] = array('palo' => PALO_TREBOL, 'valor' => 3);
+        self::$mazo[14] = array('palo' => PALO_TREBOL, 'valor' => 5);
+       
     }
     
     static public function nuevaMano()
@@ -348,16 +353,28 @@ class CorePoker
         {
             self::$apostador = self::$turn;
             $aumento = $match[1];
-            self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - (self::$maxApuestas + $aumento - self::$inGame[self::$turn-1]->apuesta);
-            self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas + $aumento;
-            self::$maxApuestas = self::$maxApuestas + $aumento;
-            self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$maxApuestas, 'target' => self::$inGame[self::$turn-1])));
-                
-            // el siguiente
-            self::$turn = self::nextTurn();
-            // evaluamos la proxima acción
-            self::$ciegaPasar = false;
-            self::evalAction();
+            if($aumento < self::$inGame[self::$turn-1]->fichas) // si tenemos suficientes fichas
+            {
+                self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - (self::$maxApuestas + $aumento - self::$inGame[self::$turn-1]->apuesta);
+                self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas + $aumento;
+                self::$maxApuestas = self::$maxApuestas + $aumento;
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$maxApuestas, 'target' => self::$inGame[self::$turn-1])));
+
+                // el siguiente
+                self::$turn = self::nextTurn();
+                // evaluamos la proxima acción
+                self::$ciegaPasar = false;
+                self::evalAction();
+            }
+        }
+        
+        // nueva mano, end of mano xD
+        if($msg == 'pong' && self::$eom)
+        {
+            self::$eom = false;
+            self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
+            self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
+            self::nuevaMano();
         }
         
     }
@@ -474,100 +491,6 @@ class CorePoker
                 $fullHouse = false;
                 $mi = self::$inGame[$r]->getCards();
                 
-                // ----------  vemos si es un par o un par doble ---------- 
-                $par = 0;
-                $parVal = 0;
-                $parSecondary = 0;
-                // ----------  revisamos los par en mano ---------- 
-                if($mi[0]['valor'] == $mi[1]['valor']) // mis cartas son iguales?
-                {
-                    $par++; // sumamos un par
-                    $parVal = $mi[0]['valor']; // asignamos el valor al par
-                }
-                // mis cartas con las de la mesa forman un par o mas?
-                for($z = 0; $z < 5; $z++)
-                {
-                    if($mi[0]['valor'] == $mesa[$z]['valor']) // si mi primera carta es igual a una de la mesa
-                    {
-                        $par++; // sumo un par
-                        if($mi[0]['valor'] > $parVal) // si es mayor a algún par anterior 
-                        {
-                            $parSecondary = $parVal; // pongo el anterior por secundario
-                            $parVal =  $mi[0]['valor']; // el actual valor principal es este
-                        } elseif($mi[0]['valor'] > $parSecondary)  // si es mas grande el primero
-                            $parSecondary = $mi[0]['valor'];
-                    }
-                    if($mi[1]['valor'] == $mesa[$z]['valor'])
-                    {
-                        $par++;
-                        if($mi[1]['valor'] > $parVal)
-                        {
-                            $parSecondary = $parVal;
-                            $parVal =  $mi[1]['valor'];
-                        } elseif($mi[1]['valor'] > $parSecondary)  // si es mas grande el primero
-                            $parSecondary = $mi[1]['valor'];
-                    }
-                }
-                echo NL.self::$inGame[$r]->nick.'-PAR/doble['.$parVal.']'.NL;
-                
-                $parVal1 = $parVal2 = 0;
-                // ----------  en busca de la pierna o poker ---------- 
-                // con primera y segunda carta
-                if($mi[0]['valor'] == $mi[1]['valor'])
-                {
-                    $counter1 = 1;
-                    $counter2 = 1;
-                } else {
-                    $counter1 = 0;
-                    $counter2 = 0;
-                }
-                
-                for($z = 0; $z < 5; $z++)
-                {
-                    
-                    if($mi[0]['valor'] == $mesa[$z]['valor'])
-                    {
-                        $counter1++;
-                        if($mi[0]['valor'] > $parVal)
-                        {
-                            $parSecondary1 = $parVal1;
-                            $parVal1 =  $mi[0]['valor'];
-                        } else
-                            $parVal1 =  $mi[0]['valor'];
-                    }
-                    
-                    if($mi[1]['valor'] == $mesa[$z]['valor'])
-                    {
-                        $counter2++;
-                        if($mi[1]['valor'] > $parVal)
-                        {
-                            $parSecondary2 = $parVal2;
-                            $parVal2 =  $mi[1]['valor'];
-                        } else 
-                            $parVal2 =  $mi[1]['valor'];
-                    }
-                }
-                // si el counter 1 es 2 tenemos pierna si es 3 tenemos poker
-                if($counter1 == 2)
-                {
-                    $pierna = true;
-                    $parVal = $parVal1;
-                } elseif($counter1 == 3)
-                {
-                    $poker = true;
-                    $parVal = $parVal1;
-                }
-                if($counter2 == 2)
-                {
-                    $pierna = true;
-                    $parVal = $parVal2;
-                } elseif($counter2 == 3) {
-                    $poker = true;
-                    $parVal = $parVal2;
-                }
-                
-                echo NL.self::$inGame[$r]->nick.'-PIERNA/poker['.$parVal.']'.$parVal1.':'.$parVal2.NL;
-            
                 // ---------- EN BUSCA DE LA ESCALERA ---------- 
                 // ordenamos las cartas de mayor a menor con burbujeo jijiji
                 $desordenadas = $mesa;
@@ -628,7 +551,6 @@ class CorePoker
                     else
                         $escalera = true;
                 }
-                echo NL.self::$inGame[$r]->nick.'-ESCALERA/real['.$parVal.']'.NL;
                 
                 if(!$escaleraReal)
                     for($c = 1; $c<5; $c++)
@@ -648,42 +570,85 @@ class CorePoker
                             $parVal = $mi[0]['valor'] > $mi[1]['valor'] ? $mi[0]['valor'] : $mi[1]['valor'];
                         }
                     }
-                // EN BUSCA DEL FULL
-                // recorremos buscando un par y una pierna
-                $repeats = 0;
-                $ante = 0;
-                $FPAR = false;
-                $FPIERNA = false;
-                $fpierVal = 0;
-                $fparVal = 0;
-                for($i = 0; $i<7; $i++)
+                
+                if(!$escaleraReal)
                 {
-                    if($desordenadas[$i]['valor'] == $ante)
-                        $repeats++;
-                    else
+                    // EN BUSCA DEL FULL
+                    // recorremos buscando un par y una pierna
+                    $repeats = 0;
+                    $ante = 0;
+                    $FPAR = false;
+                    $FPIERNA = false;
+                    $fpierVal = 0;
+                    $fparVal = 0;
+                    for($i = 0; $i<7; $i++)
                     {
-                        if($repeats == 1)
+                        if($desordenadas[$i]['valor'] == $ante)
+                            $repeats++;
+                        else
                         {
-                            $FPAR = true;
-                            $fparVal = $ante;
+                            if($repeats == 1)
+                            {
+                                $FPAR = true;
+                                $fparVal = $ante;
+                            }
+                            elseif($repeats == 2)
+                            {
+                                $FPIERNA = true;
+                                $fpierVal = $ante;
+                            }
+                            $repeats = 0;
                         }
-                        elseif($repeats == 2)
-                        {
-                            $FPIERNA = true;
-                            $fpierVal = $ante;
-                        }
-                        $repeats = 0;
+                        $ante = $desordenadas[$i]['valor'];
                     }
-                    $ante = $desordenadas[$i]['valor'];
-                }
-                if($FPAR && $FPIERNA)
-                {
-                    $fullHouse = true;
-                    $parVal = $fpierVal;
-                    $parSecondary = $fparVal;
+                    if($FPAR && $FPIERNA)
+                    {
+                        $fullHouse = true;
+                        $parVal = $fpierVal;
+                        $parSecondary = $fparVal;
+                    }
                 }
                 
-                echo NL.'FULL{'.$FPAR.'}'.$FPIERNA.NL;
+                // si no tenemos nada mejor buscamos una pierna o un par o un poker etc
+                if(!$escaleraReal)
+                {
+                    $pares = 0;
+                    $contador = 0;
+                    $parVal = 0;
+                    $parSecondary = 0;
+                    $ante = 0;
+                    for($i = 0; $i<7; $i++)
+                    {
+                        if($desordenadas[$i]['valor'] == $ante)
+                        {
+                            if($contador == 0)
+                            {
+                                $contador = 1;
+                                $pares++;
+                                if($desordenadas[$i]['valor'] > $parVal) $parVal = $desordenadas[$i]['valor'];
+                                elseif($desordenadas[$i]['valor'] > $parSecondary) $parSecondary = $desordenadas[$i]['valor'];
+                            } elseif($contador == 1)
+                            {
+                                $pares--;
+                                $contador++;
+                                $pierna = true;
+                                $parVal = $desordenadas[$i]['valor'];
+                            } elseif($contador == 2)
+                            {
+                                $contador == 0;
+                                $poker = true;
+                                $pierna = false;
+                                $parVal = $desordenadas[$i]['valor'];
+                            }
+                        } else {
+                            $contador = 0;
+                            $ante = $desordenadas[$i]['valor'];
+                        }
+                    }
+                }
+                
+                // ----------  vemos si es un par o un par doble ---------- 
+                $par = $pares;
                 
                 // ---------- MUESTREO DE MENSAJES ---------- 
                 $i = $r;
@@ -768,21 +733,26 @@ class CorePoker
         if($winner02 === false) // un solo ganador
         {
             self::Resend(json_encode(array('type' => 'system', 'msg' => 'winer', 'data' => self::$pozo, 'target' => self::$inGame[$winner])));
-            self::$inGame[$winner]->fichas = self::$pozo;
+            self::$inGame[$winner]->fichas =  self::$inGame[$winner]->fichas + self::$pozo;
             self::$pozo = 0;
         } else { // más de uno
             $canti = 1 + count($winner02);
             $fpozo = self::$pozo/$canti;
             self::Resend(json_encode(array('type' => 'system', 'msg' => 'winer', 'data' => $fpozo, 'target' => self::$inGame[$winner])));
-            self::$inGame[$winner]->fichas = $fpozo;
+            self::$inGame[$winner]->fichas = self::$inGame[$winner]->fichas + $fpozo;
             for($z = 0; $z < count($winner02); $z++)
             {
                 self::Resend(json_encode(array('type' => 'system', 'msg' => 'winer', 'data' => $fpozo, 'target' => self::$inGame[$winner02[$z]])));
-                self::$inGame[$winner02[$z]]->fichas = $fpozo;
+                self::$inGame[$winner02[$z]]->fichas = self::$inGame[$winner02[$z]]->fichas + $fpozo;
             }
             self::$pozo = 0;   
         }
         
+        echo 'EOH-]'.NL.NL;
+        self::$eom = true;
+        self::mezclar();
+        
+        PHPSocketMaster\ServerManager::SendTo(self::$inGame[$winner]->realid,json_encode(array('type' => 'system', 'msg' => 'ping')));
     }
     
     static public function evalAction()
@@ -809,7 +779,8 @@ class CorePoker
         self::$inGame = array();
         foreach(self::$players as $key => $value)
         {
-            self::$inGame[] = $value;
+            if(!$value->afk)
+                self::$inGame[] = $value;
         }
     }
     
@@ -831,7 +802,7 @@ class CorePoker
         self::$inGame[$player]->apuesta = self::$cP;
         
         // ahora la ciega grande
-        $player = ( self::$dealer+1) > count(self::$inGame)-1 ? 1 :  self::$dealer+1;
+        $player = ( self::$dealer+1) > count(self::$inGame)-1 ? 0 :  self::$dealer+1;
         $player = ( self::$dealer+1) > count(self::$inGame) ? 1 :  $player;
         // --------------------------------------------------------------------------------- COMPROBAR SI HAY DINERO SUFICIENTE PARA CIEGA
         self::$inGame[$player]->fichas = self::$inGame[$player]->fichas - self::$cG;
@@ -870,9 +841,24 @@ class CorePoker
     
     static public function disconnected($realid)
     {
-        // buscamos quien se desconectó, lo quitamos, y mandamos la info a los demas
-        // si era su turno mandamos "pasar/noir"
-        
+        foreach(self::$players as $key => $value)
+        {
+            if($value->realid == $realid)
+            {
+                self::$players[$key]->afk = true; //esta afk
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'afk', 'target' => $value)));
+            }   
+        }
+        // lo sacamos de ingame
+        for($i = 0; $i<count(self::$inGame); $i++)
+        {
+            if(self::$inGame[$i]->realid == $realid)
+            {
+                unset(self::$inGame[$i]);
+                // reordenamos el arreglo sin uno menos xD
+                self::$inGame = array_values(self::$inGame);
+            }
+        }
     }
     
 }
@@ -889,6 +875,7 @@ class player
     public $retirado = false;
     public $points = 0;
     public $sPoints = 0;
+    public $afk = false;
     
     public function __construct($id, $fichas, $pos, $name, $realid)
     {

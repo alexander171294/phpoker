@@ -17,7 +17,9 @@ $(document).ready(function(){
     
         // boton de igualar
         $('#iguala').click(function(){
+            
             websocket.send('igualar');
+            SysFichas = SysFichas - $('#iguala').data('cant');
             $('#igualar').fadeOut();
             //$('#shadow').fadeOut();
         });
@@ -31,17 +33,25 @@ $(document).ready(function(){
     
         // boton de aumentar
         $('#aumentar').click(function(){
-            websocket.send('aumentar['+$('#cantAument').val()+']');
-            $('#cantAument').val(10);
-            $('#igualar').fadeOut();
+            if(SysFichas > $('#cantAument').val())
+            {
+                websocket.send('aumentar['+$('#cantAument').val()+']');
+                SysFichas = SysFichas - $('#cantAument').val();
+                $('#cantAument').val(10);
+                $('#igualar').fadeOut();
+            } else alert('No tienes suficientes fichas');
             //$('#shadow').fadeOut();
         });
     
         // boton de aumentar
         $('#aumentar2').click(function(){
-            websocket.send('aumentar['+$('#cantAument2').val()+']');
-            $('#cantAument2').val(10);
-            $('#pasar').fadeOut();
+            if(SysFichas > $('#cantAument2').val())
+            {
+                websocket.send('aumentar['+$('#cantAument2').val()+']');
+                SysFichas = SysFichas - $('#cantAument2').val();
+                $('#cantAument2').val(10);
+                $('#pasar').fadeOut();
+            } else alert('No tienes suficientes fichas');
             //$('#shadow').fadeOut();
         });
     
@@ -98,6 +108,11 @@ function mainExec(host, port)
                         { // ignoramos nuevo jugador en nuestra posición
                             console.log(msg.data);
                         }
+                    }
+                    
+                    if(msg.msg == 'reboot')
+                    {
+                        reboot();
                     }
                     
                     if(msg.msg == 'newDealer')
@@ -165,10 +180,23 @@ function mainExec(host, port)
                         puntaje(msg);
                     }
                     
+                    if(msg.msg == 'afk')
+                    {
+                        afk(msg.target);
+                    }
+                    
                     if(msg.msg == 'winer')
                     {
                         console.log('GANADOR');
                         winner(msg);
+                    }
+                    
+                    if(msg.msg == 'ping')
+                    {
+                        console.log('PING');
+                        setTimeout(function(){
+                            websocket.send('pong');
+                        }, 3000);
                     }
                     
                 }
@@ -562,18 +590,18 @@ function turn(msg)
         {
             $('#igualar').fadeIn();
             $('#iguala').val('Igualar $'+msg.cant);
+            $('#iguala').data('cant',msg.cant);
         }
         if(msg.action == 'pasar')
             $('#pasar').fadeIn();
     }
 }
+
 function clear()
 {
     var i = 0;
     for(i=1; i<9; i++)
     {
-        // chau dealer
-        $('#dealer'+i).hide();
         // chau me, chau staff, nick y etc.
         $('#vcard'+i).removeClass('mevcard');
         $('#vcard'+i).removeClass('staff');
@@ -582,6 +610,23 @@ function clear()
         $('#vcard'+i+' .fichas').html('00000');
         $('#vcard'+i+' .apuestaPrice').html('');
         $('#cards'+i).removeClass('retirado');
+        $('#vcard'+i).removeClass('afk');
+    }
+    reboot();
+    
+}
+
+function reboot()
+{
+    var i = 0;
+    for(i=1; i<9; i++)
+    {
+        // chau dealer
+        $('#dealer'+i).hide();
+        $('#vcard'+i).removeClass('winner');
+        $('#vcard'+i+' .card1').removeClass('winner');
+        $('#vcard'+i+' .card2').removeClass('winner');
+        $('#vcard'+i+' .apuestaPrice').html('');
     }
     for(i=1; i<5; i++)
     {
@@ -636,10 +681,23 @@ function outear(target)
 function winner(msg)
 {
     console.log(msg.target.nick + ' ganó '+msg.data);
+    var i = 0;
+    for(i=1; i<9; i++)
+    {
+        $('#vcard'+i).removeClass('turn');
+    }
+    $('#vcard'+msg.target.position).addClass('winner');
+    $('#vcard'+msg.target.position+' .card1').addClass('winner');
+    $('#vcard'+msg.target.position+' .card2').addClass('winner');
 }
 
 function puntaje(msg)
 {
     console.log('puntaje');
     console.log('El jugador '+msg.target+' obtuvo '+msg.data+' de '+msg.value+' ganando '+msg.points+' puntos');
+}
+
+function afk(target)
+{
+    $('#vcard'+target.position).addClass('afk');
 }

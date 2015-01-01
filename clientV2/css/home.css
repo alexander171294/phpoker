@@ -216,7 +216,7 @@ body
 
 .mevcard
 {
-    background-color: #74A56C;
+    background-color: #6C91A5;
     color: black;
 }
 
@@ -500,4 +500,18 @@ input[type=button]:hover
     margin-left: -90px;
     margin-top: 5px;
     font-size: 10px;
+}
+
+.winner
+{
+    box-shadow: 3px 3px 4px #BCA500;
+}
+
+.afk
+{
+    box-shadow: 5px 5px 5px #F00;
+    border-color: red;
+    color: red;
+    text-shadow: 0px 0px white;
+    opacity: 0.6;
 }

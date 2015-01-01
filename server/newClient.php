@@ -55,8 +55,6 @@ class newClient extends SocketEventReceptor
                 $this->started = true;
             }
         }
-            
-
 	}
     
     public function sitdown()
