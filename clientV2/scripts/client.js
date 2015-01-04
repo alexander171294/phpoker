@@ -185,6 +185,11 @@ function mainExec(host, port)
                         afk(msg.target);
                     }
                     
+                    if(msg.msg == 'reconnect')
+                    {
+                        recon(msg.target);
+                    }
+                    
                     if(msg.msg == 'winer')
                     {
                         console.log('GANADOR');
@@ -700,4 +705,9 @@ function puntaje(msg)
 function afk(target)
 {
     $('#vcard'+target.position).addClass('afk');
+}
+
+function recon(target)
+{
+    $('#vcard'+target).removeClass('afk');
 }

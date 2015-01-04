@@ -120,6 +120,15 @@ class CorePoker
         return self::$cantPlayers;
     }
     
+    static public function sitInReconnect($obj)
+    {
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'meClient', 'data' => $obj->position)));
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'fichas', 'data' => $obj->fichas)));
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'notify', 'msg' => 'Esperando fin de la mano.')));
+        self::resend(json_encode(array('type' => 'system', 'msg' => 'reconnect', 'target' => $obj->position)));
+    }
+    
     static public function me($ide)
     {
         $ide = 'PvP'.$ide;
@@ -161,7 +170,6 @@ class CorePoker
         self::seleccionar();
         echo '...1...'.NL;
         sleep(1);
-        self::Resend(json_encode(array('type' => 'notify', 'msg' => 'out')));
         // establecemos ciegas
         self::$cP = config::getConfig()->ciegaP;
         self::$cG = config::getConfig()->ciegaG;
@@ -213,8 +221,14 @@ class CorePoker
        
     }
     
+    static public function inGame()
+    {
+        return self::$initiated;
+    }
+    
     static public function nuevaMano()
     {
+        self::Resend(json_encode(array('type' => 'notify', 'msg' => 'out')));
         self::$mano++;
         // preparar jugadores
         self::toInGame();
@@ -324,7 +338,7 @@ class CorePoker
                 {
                     self::$step = FLOP;
                     self::flop();
-                } elseif(self::$step == FLOP && self::$turn == self::$apostador) //----------------------------- FIXEAR A PARTIR DE ACÁ
+                } elseif(self::$step == FLOP && self::$turn == self::$apostador)
                 {
                     self::$step = TURN;
                     self::turn();
@@ -859,6 +873,24 @@ class CorePoker
                 self::$inGame = array_values(self::$inGame);
             }
         }
+    }
+    
+    static public function reconnect($id, $realid)
+    {
+        // revisamos si existe algun socket con este id y lo reconectamos
+        foreach(self::$players as $key => $value)
+        {
+            if(self::$players[$key]->nick == $id) // comprobamos si coincide
+            {
+                self::$players[$key]->realid = $realid;
+                self::$players[$key]->afk = false;
+                // hay que sentarlo
+                self::sitInReconnect(self::$players[$key]);
+                return true;
+            }
+        }
+        
+        return false;
     }
     
 }

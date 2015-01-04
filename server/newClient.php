@@ -50,9 +50,12 @@ class newClient extends SocketEventReceptor
             {
                 \CorePoker::analize($message, $this->id);
             } else {
-                $this->name = $message['payload'];
-                $this->sitdown();
-                $this->started = true;
+                if(!\CorePoker::reconnect($message['payload'], $this->id))
+                {
+                    $this->name = $message['payload'];
+                    $this->sitdown();
+                    $this->started = true;
+                }
             }
         }
 	}
@@ -72,7 +75,10 @@ class newClient extends SocketEventReceptor
         
         // verificamos si se puede comenzar, y en caso de que se pueda comenzar, mezclamos, repartimos, pedimos ciegas, etc.
         if(\CorePoker::continuable())
-            \CorePoker::init();
+        {
+            if(!\CorePoker::inGame())
+                \CorePoker::init();
+        }
         else
              ServerManager::Resend(json_encode(array('type' => 'notify', 'msg' => 'Se est&aacute;n esperando m&aacute;s jugadores')));
     }
