@@ -418,12 +418,22 @@ class CorePoker
                   self::evalAction();
               }
           }
+          
+            if($msg == 'pong' && self::$eom)
+            {
+                echo 'PONG'.PHP_EOL;
+                self::$eom = false;
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
+                self::nuevaMano();
+            }
         
         } else { // acción ilegal
             // termina la mano
             // ATENTO QUE SI EL JUGADOR NO ESTÁ CONECTADO NO RESPONDE EL PONG Y NO SE EMPIEZA NUEVA MANO *****************************************
             if($msg == 'pong' && self::$eom)
             {
+                echo 'PONG'.PHP_EOL;
                 self::$eom = false;
                 self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
                 self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));

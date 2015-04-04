@@ -30,7 +30,7 @@ class newClient extends SocketEventReceptor
         } else {
             $this->requestName = true;
             $this->getBridge()->send(json_encode(array('type' => 'system', 'msg' => 'getNick')));
-            $this->setTimeOut(array($this, 'clientverify'), 3.5, true);
+            //$this->setTimeOut(array($this, 'clientverify'), 3.5, true);
         }
 	}
   
@@ -43,7 +43,7 @@ class newClient extends SocketEventReceptor
       // damos un segundo y medio para responder
       $this->setTimeOut(array($this, 'verifyStep2'), 1.5, false);
       // mostramos en consola el envio de ping
-      echo 'V-ping -> '.$this->id.NL;
+      echo '<-('.$this->id.')-> ';
   }
   
   public function verifyStep2()
@@ -62,7 +62,7 @@ class newClient extends SocketEventReceptor
 	}
 
 	public function onReceiveMessage($message)
-	{
+	{                                          
 		
 		// fix for windows sockets message
 		$message = is_array($message) ? $message[0] : $message;
@@ -70,7 +70,7 @@ class newClient extends SocketEventReceptor
         if($message['payload'] == 'V-pong')
         {
             $this->pinged = true;
-            echo $this->id.' -> V-pong '.NL;
+            echo '->('.$this->id.')<-';
         } else if($this->requestName)
         {
             if($this->started)

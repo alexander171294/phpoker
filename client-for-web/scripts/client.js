@@ -205,6 +205,7 @@ function mainExec(host, port)
                     {
                         console.log('PING');
                         setTimeout(function(){
+                            console.log('PONG');
                             websocket.send('pong');
                         }, 3000);
                     }
