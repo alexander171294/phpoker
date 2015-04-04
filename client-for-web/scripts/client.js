@@ -190,6 +190,11 @@ function mainExec(host, port)
                         recon(msg.target);
                     }
                     
+                    if(msg.msg == 'meReconnect')
+                    {
+                        $('#CartasMesa').fadeIn();
+                    }
+                    
                     if(msg.msg == 'winer')
                     {
                         console.log('GANADOR');
@@ -212,6 +217,18 @@ function mainExec(host, port)
                     else
                         desnotificar();
                 }
+                if(msg.type=='services')
+                {
+                    if(msg.msg == 'V-ping')
+                    {
+                        websocket.send('V-pong');
+                    }
+                    
+                    if(msg.msg == 'ILLEGAL')
+                    {
+                        alert('ACCIÓN ILEGAL!');
+                    }
+                }
             }
             websocket.onopen = function(ev) { // connection is open
                 $('#panel').fadeOut();
@@ -229,16 +246,25 @@ function mainExec(host, port)
             // desconexión
             websocket.onclose = function(ev)
             {
-                notificar('Error de conexi&oacute;n.');
-                $('#shadow').fadeIn();
-                $('#panel').fadeIn();
-                clear();
+                if(!autoConnect)
+                {
+                  notificar('Error de conexi&oacute;n.');
+                  $('#shadow').fadeIn();
+                  $('#panel').fadeIn();
+                  clear();
+                } else {
+                  notificar('Error de conexi&oacute;n. Reconectando');
+                  clear();
+                  setTimeout(function(){
+                            mainExec(host, port);
+                        }, 3000);
+                }
             };
 }
 
 function getNick()
 {
-    SysNick = prompt('Mi nombre:', '');
+    SysNick = autoID;
     if(SysNick!=='')
         websocket.send(SysNick);
 }

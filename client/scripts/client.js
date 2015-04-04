@@ -17,38 +17,48 @@ $(document).ready(function(){
     
         // boton de igualar
         $('#iguala').click(function(){
+            
             websocket.send('igualar');
+            SysFichas = SysFichas - $('#iguala').data('cant');
             $('#igualar').fadeOut();
-            $('#shadow').fadeOut();
+            //$('#shadow').fadeOut();
         });
     
         // boton de igualar
         $('#nir').click(function(){
             websocket.send('nir');
             $('#igualar').fadeOut();
-            $('#shadow').fadeOut();
+            //$('#shadow').fadeOut();
         });
     
         // boton de aumentar
         $('#aumentar').click(function(){
-            websocket.send('aumentar['+$('#cantAument').val()+']');
-            $('#cantAument').val(10);
-            $('#igualar').fadeOut();
-            $('#shadow').fadeOut();
+            if(SysFichas > $('#cantAument').val())
+            {
+                websocket.send('aumentar['+$('#cantAument').val()+']');
+                SysFichas = SysFichas - $('#cantAument').val();
+                $('#cantAument').val(10);
+                $('#igualar').fadeOut();
+            } else alert('No tienes suficientes fichas');
+            //$('#shadow').fadeOut();
         });
     
         // boton de aumentar
         $('#aumentar2').click(function(){
-            websocket.send('aumentar['+$('#cantAument2').val()+']');
-            $('#cantAument2').val(10);
-            $('#pasar').fadeOut();
-            $('#shadow').fadeOut();
+            if(SysFichas > $('#cantAument2').val())
+            {
+                websocket.send('aumentar['+$('#cantAument2').val()+']');
+                SysFichas = SysFichas - $('#cantAument2').val();
+                $('#cantAument2').val(10);
+                $('#pasar').fadeOut();
+            } else alert('No tienes suficientes fichas');
+            //$('#shadow').fadeOut();
         });
     
         $('#pasarBTN').click(function(){
             websocket.send('pasar');
             $('#pasar').fadeOut();
-            $('#shadow').fadeOut();
+            //$('#shadow').fadeOut();
         });
 });
 
@@ -98,6 +108,11 @@ function mainExec(host, port)
                         { // ignoramos nuevo jugador en nuestra posición
                             console.log(msg.data);
                         }
+                    }
+                    
+                    if(msg.msg == 'reboot')
+                    {
+                        reboot();
                     }
                     
                     if(msg.msg == 'newDealer')
@@ -165,7 +180,35 @@ function mainExec(host, port)
                         puntaje(msg);
                     }
                     
-                    console.log(msg.msg);
+                    if(msg.msg == 'afk')
+                    {
+                        afk(msg.target);
+                    }
+                    
+                    if(msg.msg == 'reconnect')
+                    {
+                        recon(msg.target);
+                    }
+                    
+                    if(msg.msg == 'meReconnect')
+                    {
+                        $('#CartasMesa').fadeIn();
+                    }
+                    
+                    if(msg.msg == 'winer')
+                    {
+                        console.log('GANADOR');
+                        winner(msg);
+                    }
+                    
+                    if(msg.msg == 'ping')
+                    {
+                        console.log('PING');
+                        setTimeout(function(){
+                            websocket.send('pong');
+                        }, 3000);
+                    }
+                    
                 }
                 if(msg.type=='notify')
                 {
@@ -173,6 +216,18 @@ function mainExec(host, port)
                         notificar(msg.msg);
                     else
                         desnotificar();
+                }
+                if(msg.type=='services')
+                {
+                    if(msg.msg == 'V-ping')
+                    {
+                        websocket.send('V-pong');
+                    }
+                    
+                    if(msg.msg == 'ILLEGAL')
+                    {
+                        alert('ACCIÓN ILEGAL!');
+                    }
                 }
             }
             websocket.onopen = function(ev) { // connection is open
@@ -191,10 +246,19 @@ function mainExec(host, port)
             // desconexión
             websocket.onclose = function(ev)
             {
-                notificar('Error de conexi&oacute;n.');
-                $('#shadow').fadeIn();
-                $('#panel').fadeIn();
-                clear();
+                if(!autoConnect)
+                {
+                  notificar('Error de conexi&oacute;n.');
+                  $('#shadow').fadeIn();
+                  $('#panel').fadeIn();
+                  clear();
+                } else {
+                  notificar('Error de conexi&oacute;n. Reconectando');
+                  clear();
+                  setTimeout(function(){
+                            mainExec(host, port);
+                        }, 3000);
+                }
             };
 }
 
@@ -236,7 +300,7 @@ function lanzarTurn(uno)
     if(uno.palo == 3)
         palo = '♠';
     if(uno.palo == 4)
-        palo = '✿';
+        palo = '♣';
     
     if(uno.valor>1 && uno.valor<11)
             valor = uno.valor;
@@ -269,7 +333,7 @@ function lanzarRiver(uno)
     if(uno.palo == 3)
         palo = '♠';
     if(uno.palo == 4)
-        palo = '✿';
+        palo = '♣';
     
     if(uno.valor>1 && uno.valor<11)
             valor = uno.valor;
@@ -302,7 +366,7 @@ function lanzarFlop(uno, dos, tres)
     if(uno.palo == 3)
         palo = '♠';
     if(uno.palo == 4)
-        palo = '✿';
+        palo = '♣';
     
     if(uno.valor>1 && uno.valor<11)
             valor = uno.valor;
@@ -328,7 +392,7 @@ function lanzarFlop(uno, dos, tres)
     if(dos.palo == 3)
         palo = '♠';
     if(dos.palo == 4)
-        palo = '✿';
+        palo = '♣';
     
     if(dos.valor>1 && dos.valor<11)
             valor = dos.valor;
@@ -354,7 +418,7 @@ function lanzarFlop(uno, dos, tres)
     if(tres.palo == 3)
         palo = '♠';
     if(tres.palo == 4)
-        palo = '✿';
+        palo = '♣';
     
     if(tres.valor>1 && tres.valor<11)
             valor = tres.valor;
@@ -418,7 +482,7 @@ function cartas(msg)
     if(msg.data[0].palo == 3)
         palo = '♠';
     if(msg.data[0].palo == 4)
-        palo = '✿';
+        palo = '♣';
     $('#vcard'+SysPos+' .cards .card1').html(valor+'<br />'+palo);                                          
                         
     // mostramos segunda carta
@@ -443,7 +507,7 @@ function cartas(msg)
     if(msg.data[1].palo == 3)
         palo = '♠';
     if(msg.data[1].palo == 4)
-        palo = '✿';
+        palo = '♣';
     $('#vcard'+SysPos+' .cards .card2').html(valor+'<br />'+palo); 
     $('.cards').fadeIn();
 }
@@ -478,7 +542,7 @@ function cartasv2(msg)
         if(msg.data[0].palo == 3)
             palo = '♠';
         if(msg.data[0].palo == 4)
-            palo = '✿';
+            palo = '♣';
         $('#vcard'+msg.target.position+' .cards .card1').html(valor+'<br />'+palo);                                          
 
         // mostramos segunda carta
@@ -503,7 +567,7 @@ function cartasv2(msg)
         if(msg.data[1].palo == 3)
             palo = '♠';
         if(msg.data[1].palo == 4)
-            palo = '✿';
+            palo = '♣';
         $('#vcard'+msg.target.position+' .cards .card2').html(valor+'<br />'+palo); 
         $('.cards').fadeIn();
     }
@@ -540,6 +604,7 @@ function paid(msg)
     console.log(msg.target.nick+' paga '+msg.data);
     $('#vcard'+msg.target.position+' .apuesta').fadeIn();
     $('#vcard'+msg.target.position+' .apuesta').attr('title', '$'+msg.data);
+    $('#vcard'+msg.target.position+' .apuestaPrice').html('$'+msg.data);
 }
 function turn(msg)
 {
@@ -551,30 +616,48 @@ function turn(msg)
     $('#vcard'+msg.data).addClass('turn');
     if(msg.data == SysPos)
     {
-        $('#shadow').fadeIn();
+        //$('#shadow').fadeIn();
         if(msg.action == 'igualar')
         {
             $('#igualar').fadeIn();
             $('#iguala').val('Igualar $'+msg.cant);
+            $('#iguala').data('cant',msg.cant);
         }
         if(msg.action == 'pasar')
             $('#pasar').fadeIn();
     }
 }
+
 function clear()
 {
     var i = 0;
     for(i=1; i<9; i++)
     {
-        // chau dealer
-        $('#dealer'+i).hide();
         // chau me, chau staff, nick y etc.
         $('#vcard'+i).removeClass('mevcard');
         $('#vcard'+i).removeClass('staff');
         $('#vcard'+i).removeClass('turn');
         $('#vcard'+i+' .name').html('Vac&iacute;o');
         $('#vcard'+i+' .fichas').html('00000');
+        $('#vcard'+i+' .apuestaPrice').html('');
         $('#cards'+i).removeClass('retirado');
+        $('#vcard'+i).removeClass('afk');
+    }
+    reboot();
+    
+}
+
+function reboot()
+{
+    var i = 0;
+    for(i=1; i<9; i++)
+    {
+        // chau dealer
+        $('#dealer'+i).hide();
+        $('#vcard'+i).removeClass('winner');
+        $('#vcard'+i+' .card1').removeClass('winner');
+        $('#vcard'+i+' .card2').removeClass('winner');
+        $('#vcard'+i+' .apuestaPrice').html('');
     }
     for(i=1; i<5; i++)
     {
@@ -626,8 +709,31 @@ function outear(target)
     
 }
 
+function winner(msg)
+{
+    console.log(msg.target.nick + ' ganó '+msg.data);
+    var i = 0;
+    for(i=1; i<9; i++)
+    {
+        $('#vcard'+i).removeClass('turn');
+    }
+    $('#vcard'+msg.target.position).addClass('winner');
+    $('#vcard'+msg.target.position+' .card1').addClass('winner');
+    $('#vcard'+msg.target.position+' .card2').addClass('winner');
+}
+
 function puntaje(msg)
 {
     console.log('puntaje');
     console.log('El jugador '+msg.target+' obtuvo '+msg.data+' de '+msg.value+' ganando '+msg.points+' puntos');
+}
+
+function afk(target)
+{
+    $('#vcard'+target.position).addClass('afk');
+}
+
+function recon(target)
+{
+    $('#vcard'+target).removeClass('afk');
 }

@@ -40,4 +40,9 @@ class Socket extends SocketMaster
     {
         //... 
     }
+    
+    public function onRefresh()
+    {
+        
+    }
 }

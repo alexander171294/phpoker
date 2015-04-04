@@ -32,7 +32,7 @@ define('SCKM_SERVER', 5);
 
 abstract class SocketMaster implements iSocketMaster
 {
-	use Property, timeOut;
+	use Property;
 
 	protected $address = 'localhost';
 	protected $port = 0;
@@ -153,7 +153,7 @@ abstract class SocketMaster implements iSocketMaster
 	// return true if new messages, return fales if not new messages
 	final public function refresh()
 	{
-        $this->timeOut_refresh(); // support for trait TimeOut
+        $this->onRefresh();
         $read = array($this->socketRef);
         $write = null;
         $exceptions = null;
@@ -181,7 +181,7 @@ abstract class SocketMaster implements iSocketMaster
 	//detect new request external connections
 	final public function refreshListen(SocketEventReceptor $Callback, $type = SCKM_BASIC)
 	{
-        $Callback->timeOut_refresh(); // support for trait TimeOut
+        $this->onRefresh();
         if($type !== SCKM_BASIC) $this->Type = $type;
         $read = array($this->socketRef);
         $write = null;
@@ -281,6 +281,8 @@ abstract class SocketMaster implements iSocketMaster
     abstract public function onSendRequest(&$cancel, $message);
     // call on finish send message
     abstract public function onSendComplete($message);
+    // call on refresh status
+    abstract public function onRefresh();
 
 	final private function getError()
 	{

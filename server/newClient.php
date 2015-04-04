@@ -3,7 +3,8 @@
 
 class newClient extends SocketEventReceptor
 {
-
+    use timeOut;
+    
 	private $name = 'Noname';
 	private $requested = false;
 	public $id;
@@ -11,6 +12,7 @@ class newClient extends SocketEventReceptor
     private $requestName = false;
     private $position = 0;
     private $started = false;
+    private $pinged = true;
 
 	public function onError()
 	{
@@ -28,8 +30,29 @@ class newClient extends SocketEventReceptor
         } else {
             $this->requestName = true;
             $this->getBridge()->send(json_encode(array('type' => 'system', 'msg' => 'getNick')));
+            $this->setTimeOut(array($this, 'clientverify'), 3.5, true);
         }
 	}
+  
+  public function clientverify()
+  {
+      // establecemos que no respondió el ping
+      $this->pinged = false;
+      // enviamos solicitud de ping
+      $this->getBridge()->send(json_encode(array('type' => 'services', 'msg' => 'V-ping')));
+      // damos un segundo y medio para responder
+      $this->setTimeOut(array($this, 'verifyStep2'), 1.5, false);
+      // mostramos en consola el envio de ping
+      echo 'V-ping -> '.$this->id.NL;
+  }
+  
+  public function verifyStep2()
+  {
+      if(!$this->pinged) //si no respondio en este segundo y medio
+      {
+          \CorePoker::disconnected($this->id);    
+      }
+  }
 
 	public function onDisconnect()
 	{
@@ -44,7 +67,11 @@ class newClient extends SocketEventReceptor
 		// fix for windows sockets message
 		$message = is_array($message) ? $message[0] : $message;
 		// que es lo que nos mandan?
-        if($this->requestName)
+        if($message['payload'] == 'V-pong')
+        {
+            $this->pinged = true;
+            echo $this->id.' -> V-pong '.NL;
+        } else if($this->requestName)
         {
             if($this->started)
             {
@@ -91,5 +118,10 @@ class newClient extends SocketEventReceptor
     public function onSendComplete($message) 
     {
         //... 
+    }
+    
+    public function onRefresh() // revisamos si es nuestro turno
+    {
+        $this->timeOut_refresh();
     }
 }

@@ -3,6 +3,9 @@
 /**
  * @wiki https://github.com/alexander171294/PHPSocketMaster/wiki/PHPSocketMaster-como-WebSocket
  */
+ 
+ define('LOCAL_IP', '127.0.0.1');
+ define('LOCAL_PORT', '6768');
 
 // example of websocket using directly SocketMaster
 
@@ -25,7 +28,7 @@ class ServerManager
 	static public function start()
 	{
 		// create a new socket
-		self::$sock = new Socket('192.168.0.101', '6768');
+		self::$sock = new Socket(LOCAL_IP, LOCAL_PORT);
 
 		self::$sock->listen(); 
 

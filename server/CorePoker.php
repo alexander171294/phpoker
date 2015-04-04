@@ -120,12 +120,27 @@ class CorePoker
         return self::$cantPlayers;
     }
     
+    // funcion para establecer el sentarse luego de una conexión
     static public function sitInReconnect($obj)
     {
         PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'meClient', 'data' => $obj->position)));
         PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'fichas', 'data' => $obj->fichas)));
         PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
-        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'notify', 'msg' => 'Esperando fin de la mano.')));
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'newDealer', 'data' => self::$dealer)));
+        PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'meReconnect')));
+        if(self::$step == FLOP)  // enviamos cartas del flop
+        {
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'flop', 'uno' => self::$inTable[0], 'dos' => self::$inTable[1], 'tres' => self::$inTable[2])));
+        } elseif(self::$step == TURN)  // enviamos cartas del turn y flop
+        {
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'flop', 'uno' => self::$inTable[0], 'dos' => self::$inTable[1], 'tres' => self::$inTable[2])));
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'turn', 'uno' => self::$inTable[3])));
+        } elseif(self::$step == RIVER) // enviamos cartas del river, turn y flop
+        {
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'flop', 'uno' => self::$inTable[0], 'dos' => self::$inTable[1], 'tres' => self::$inTable[2])));
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,json_encode(array('type' => 'system', 'msg' => 'turn', 'uno' => self::$inTable[3])));
+            PHPSocketMaster\ServerManager::SendTo($obj->realid,(array('type' => 'system', 'msg' => 'river', 'uno' => self::$inTable[4])));
+        }
         self::resend(json_encode(array('type' => 'system', 'msg' => 'reconnect', 'target' => $obj->position)));
     }
     
@@ -135,6 +150,7 @@ class CorePoker
         return self::$players[$ide];
     }
     
+    // funcion para obtener clientes
     static public function getClients()
     {
         $out = array();
@@ -145,11 +161,13 @@ class CorePoker
         return $out;
     }
     
+    // funcion que resuelve si hay un minimo de jugadores suficiente para poder empezar a jugar
     static public function continuable()
     {
         return self::$cantPlayers>=config::getConfig()->minimoJugadores;
     }
     
+    // funcion que comienza el juego
     static public function init()
     {
         if(self::$initiated)
@@ -178,6 +196,7 @@ class CorePoker
         self::nuevaMano();
     }
     
+    // funcion que simula mezclar el mazo
     static public function mezclar()
     {
         $aux = null;
@@ -221,11 +240,13 @@ class CorePoker
        
     }
     
+    // funcion que resuelve si estamos jugando
     static public function inGame()
     {
         return self::$initiated;
     }
     
+    // funcion que empieza una nueva mano
     static public function nuevaMano()
     {
         self::Resend(json_encode(array('type' => 'notify', 'msg' => 'out')));
@@ -256,6 +277,7 @@ class CorePoker
         self::Resend(json_encode(array('type' => 'system', 'msg' => 'turno', 'data' => self::$turn, 'action' => 'igualar', 'cant' => self::$maxApuestas-self::$inGame[self::$turn-1]->apuesta)));
     }
     
+    // funcion que despacha las cartas
     static public function despachar()
     {
         // dar cartas a cada uno
@@ -269,6 +291,7 @@ class CorePoker
         }
     }
     
+    // funcion que manda el siguiente turno
     static public function nextTurn()
     {
         $newTurn = false;
@@ -297,98 +320,111 @@ class CorePoker
         return false;
     }
     
+    // funcion que analiza los mensajes recibidos
     static public function analize($msg, $idsocket)
     {
         $msg = $msg['payload'];
-        if(self::$requestedAction == 'igualar')
+        // me toca a mi?
+        if($idsocket == self::$inGame[self::$turn-1]->realid)
         {
-            if($msg == 'igualar')
-            {
-                // igualo la apuesta
-                $apuesta = self::$maxApuestas-self::$inGame[self::$turn-1]->apuesta;
-                self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas;
-                self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - $apuesta;
-                // aviso de mi apuesta
-                self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$inGame[self::$turn-1]->apuesta, 'target' => self::$inGame[self::$turn-1])));
-                // el siguiente
-                self::$turn = self::nextTurn();
-                // evaluamos la proxima acción
-                self::evalAction();
-            }
-            if($msg == 'nir')
-            {
-                self::$pozo = self::$pozo + self::$inGame[self::$turn-1]->apuesta;
-                self::$inGame[self::$turn-1]->apuesta = 0;
-                self::Resend(json_encode(array('type' => 'system', 'msg' => 'playerOut', 'target' => self::$inGame[self::$turn-1])));
-                self::$inGame[self::$turn-1]->retirado = true;
-                self::$inGame = array_values(self::$inGame);
-                
-                // el siguiente
-                self::$turn = self::nextTurn();
-                // evaluamos la proxima acción
-                self::evalAction();
-            }
-        }
+          // si la accion esperada era igualar
+          if(self::$requestedAction == 'igualar')
+          {
+              // si el usuario quiere igualar
+              if($msg == 'igualar')
+              {
+                  // igualo la apuesta
+                  $apuesta = self::$maxApuestas-self::$inGame[self::$turn-1]->apuesta;
+                  self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas;
+                  self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - $apuesta;
+                  // aviso de mi apuesta
+                  self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$inGame[self::$turn-1]->apuesta, 'target' => self::$inGame[self::$turn-1])));
+                  // el siguiente
+                  self::$turn = self::nextTurn();
+                  // evaluamos la proxima acción
+                  self::evalAction();
+              }
+              // si el usuario quiere no ir
+              if($msg == 'nir')
+              {
+                  self::$pozo = self::$pozo + self::$inGame[self::$turn-1]->apuesta;
+                  self::$inGame[self::$turn-1]->apuesta = 0;
+                  self::Resend(json_encode(array('type' => 'system', 'msg' => 'playerOut', 'target' => self::$inGame[self::$turn-1])));
+                  self::$inGame[self::$turn-1]->retirado = true;
+                  self::$inGame = array_values(self::$inGame);
+                  
+                  // el siguiente
+                  self::$turn = self::nextTurn();
+                  // evaluamos la proxima acción
+                  self::evalAction();
+              }
+          }
+          
+          // si la accion esperada era pasar
+          if(self::$requestedAction == 'pasar')
+          {
+              // si seleccionó pasar
+              if($msg == 'pasar')
+              {
+                  if(self::$step == INICIAL && self::$turn == self::$apostador)
+                  {
+                      self::$step = FLOP;
+                      self::flop();
+                  } elseif(self::$step == FLOP && self::$turn == self::$apostador)
+                  {
+                      self::$step = TURN;
+                      self::turn();
+                  } elseif(self::$step == TURN && self::$turn == self::$apostador)
+                  {
+                      self::$step = RIVER;
+                      self::river();
+                  } elseif(self::$step == RIVER && self::$turn == self::$apostador)
+                  {
+                      self::$step = INICIAL;
+                      self::repartija();
+                  } else {
+                      //pasar natural
+                      // el siguiente
+                      self::$turn = self::nextTurn();
+                      self::evalAction();
+                  }
+              }
+          }
+          
+          $match = false;
+          preg_match('/aumentar\[([0-9]*)\]/', $msg, $match);
+          
+          // usar regex1
+          if($match !== array())
+          {
+              self::$apostador = self::$turn;
+              $aumento = $match[1];
+              if($aumento < self::$inGame[self::$turn-1]->fichas) // si tenemos suficientes fichas
+              {
+                  self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - (self::$maxApuestas + $aumento - self::$inGame[self::$turn-1]->apuesta);
+                  self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas + $aumento;
+                  self::$maxApuestas = self::$maxApuestas + $aumento;
+                  self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$maxApuestas, 'target' => self::$inGame[self::$turn-1])));
+  
+                  // el siguiente
+                  self::$turn = self::nextTurn();
+                  // evaluamos la proxima acción
+                  self::$ciegaPasar = false;
+                  self::evalAction();
+              }
+          }
+          
+          // nueva mano, end of mano xD
+          if($msg == 'pong' && self::$eom)
+          {
+              self::$eom = false;
+              self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
+              self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
+              self::nuevaMano();
+          }
         
-        if(self::$requestedAction == 'pasar')
-        {
-            if($msg == 'pasar')
-            {
-                if(self::$step == INICIAL && self::$turn == self::$apostador)
-                {
-                    self::$step = FLOP;
-                    self::flop();
-                } elseif(self::$step == FLOP && self::$turn == self::$apostador)
-                {
-                    self::$step = TURN;
-                    self::turn();
-                } elseif(self::$step == TURN && self::$turn == self::$apostador)
-                {
-                    self::$step = RIVER;
-                    self::river();
-                } elseif(self::$step == RIVER && self::$turn == self::$apostador)
-                {
-                    self::$step = INICIAL;
-                    self::repartija();
-                } else {
-                    //pasar natural
-                    // el siguiente
-                    self::$turn = self::nextTurn();
-                    self::evalAction();
-                }
-            }
-        }
-        
-        $match = false;
-        preg_match('/aumentar\[([0-9]*)\]/', $msg, $match);
-        
-        // usar regex1
-        if($match !== array())
-        {
-            self::$apostador = self::$turn;
-            $aumento = $match[1];
-            if($aumento < self::$inGame[self::$turn-1]->fichas) // si tenemos suficientes fichas
-            {
-                self::$inGame[self::$turn-1]->fichas = self::$inGame[self::$turn-1]->fichas - (self::$maxApuestas + $aumento - self::$inGame[self::$turn-1]->apuesta);
-                self::$inGame[self::$turn-1]->apuesta = self::$maxApuestas + $aumento;
-                self::$maxApuestas = self::$maxApuestas + $aumento;
-                self::Resend(json_encode(array('type' => 'system', 'msg' => 'Paid', 'data' => self::$maxApuestas, 'target' => self::$inGame[self::$turn-1])));
-
-                // el siguiente
-                self::$turn = self::nextTurn();
-                // evaluamos la proxima acción
-                self::$ciegaPasar = false;
-                self::evalAction();
-            }
-        }
-        
-        // nueva mano, end of mano xD
-        if($msg == 'pong' && self::$eom)
-        {
-            self::$eom = false;
-            self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
-            self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
-            self::nuevaMano();
+        } else { // acción ilegal
+            PHPSocketMaster\ServerManager::SendTo($idsocket, json_encode(array('type' => 'services', 'msg' => 'ILLEGAL')));
         }
         
     }
