@@ -113,11 +113,16 @@ class CorePoker
     
     static public function sit($identifier, $name, $id)
     {
-        $ide = 'PvP'.$identifier;
-        $name = strlen($name) > 10 ? substr($name, 0, 8).'~' : $name; // nicks de no mas de 10 caracteres
-        self::$cantPlayers = self::$cantPlayers +1;
-        self::$players[$ide] = new player($ide, config::getConfig()->fichasIniciales, self::$cantPlayers, $name, $id);
-        return self::$cantPlayers;
+        if(self::$cantPlayers < 8)
+        {
+            $ide = 'PvP'.$identifier;
+            $name = strlen($name) > 10 ? substr($name, 0, 8).'~' : $name; // nicks de no mas de 10 caracteres
+            self::$cantPlayers = self::$cantPlayers +1;
+            self::$players[$ide] = new player($ide, config::getConfig()->fichasIniciales, self::$cantPlayers, $name, $id);
+            return self::$cantPlayers;
+        } else {
+            PHPSocketMaster\ServerManager::SendTo($id, json_encode(array('type' => 'services', 'msg' => 'FullTable')));
+        }                                        
     }
     
     // funcion para establecer el sentarse luego de una conexión
