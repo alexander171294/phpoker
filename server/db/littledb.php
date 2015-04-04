@@ -192,12 +192,11 @@ class LittleDB
    * para conectar.
    * @return object $instance Instancia de la base de datos.
    */
-  public static function get_instance()
+  public static function get_instance($config)
    {
     if(self::$instance === null)
      {
-      $config = get_config('database');
-      self::$instance = new LittleDB($config['host'], $config['user'], $config['password'], $config['database'], $config['prefix'], $config['logs_handler'], $config['errors_handler']);
+      self::$instance = new LittleDB($config['host'], $config['user'], $config['password'], $config['database']);
      }
     return self::$instance;
    } // public static function get_instance();

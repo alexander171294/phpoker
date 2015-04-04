@@ -6,7 +6,7 @@
  
  define('LOCAL_IP', '192.168.0.101');
  define('LOCAL_PORT', '6768');
- define('LOCAL_PING', true); // permitimos que el server envíe pings para saber si el cliente está online
+ define('LOCAL_VPING', true); // permitimos que el server envíe pings para saber si el cliente está online
  
  // DATABASE SERVER
  define('REMOTE_HOST', 'localhost');
@@ -42,7 +42,7 @@ class ServerManager
 
 		self::$sock->listen();
     
-    self::$db = new LittleDB(REMOTE_HOST, REMOTE_USER, REMOTE_PASS, REMOTE_DB); 
+    self::$db = \LittleDB::get_instance(array('host' => REMOTE_HOST, 'user' => REMOTE_USER, 'password' => REMOTE_PASS, 'database' => REMOTE_DB)); 
 
 		echo '** listen **';
 
