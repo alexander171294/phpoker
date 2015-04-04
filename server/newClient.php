@@ -82,10 +82,8 @@ class newClient extends SocketEventReceptor
                 $key = $message['payload'];
                 // obtenemos su nick
                 $db = ServerManager::getDB();
-                var_dump($key);
                 $res = $db->query('select nombre_user from users where key_user = ?', array($key));
                 $res = $res->fetch();
-                var_dump($res);
                 if(!\CorePoker::reconnect($res['nombre_user'], $this->id))
                 {
                     $this->name = $res['nombre_user'];
