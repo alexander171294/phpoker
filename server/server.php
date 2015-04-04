@@ -6,6 +6,7 @@
  
  define('LOCAL_IP', '127.0.0.1');
  define('LOCAL_PORT', '6768');
+ define('LOCAL_PING', true); // permitimos que el server envíe pings para saber si el cliente está online
 
 // example of websocket using directly SocketMaster
 

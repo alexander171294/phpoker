@@ -30,7 +30,8 @@ class newClient extends SocketEventReceptor
         } else {
             $this->requestName = true;
             $this->getBridge()->send(json_encode(array('type' => 'system', 'msg' => 'getNick')));
-            //$this->setTimeOut(array($this, 'clientverify'), 3.5, true);
+            if(defined(LOCAL_VPING))
+            $this->setTimeOut(array($this, 'clientverify'), 3.5, true);
         }
 	}
   
