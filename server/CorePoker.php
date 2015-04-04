@@ -216,7 +216,7 @@ class CorePoker
             self::$mazo[$rnd2] = $aux;
             $aux = null;
         }
-        /*  CARTAS FIJAS */
+        /*  CARTAS FIJAS 
         
         // primer persona
         self::$mazo[1] = array('palo' => PALO_CORAZON, 'valor' => 13);
@@ -241,7 +241,7 @@ class CorePoker
         // descarte
         self::$mazo[13] = array('palo' => PALO_CORAZON, 'valor' => 14);
         // river
-        self::$mazo[14] = array('palo' => PALO_TREBOL, 'valor' => 5);
+        self::$mazo[14] = array('palo' => PALO_TREBOL, 'valor' => 5);*/
        
     }
     
