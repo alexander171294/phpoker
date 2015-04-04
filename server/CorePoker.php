@@ -418,18 +418,19 @@ class CorePoker
                   self::evalAction();
               }
           }
-          
-          // nueva mano, end of mano xD
-          if($msg == 'pong' && self::$eom)
-          {
-              self::$eom = false;
-              self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
-              self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
-              self::nuevaMano();
-          }
         
         } else { // acción ilegal
-            PHPSocketMaster\ServerManager::SendTo($idsocket, json_encode(array('type' => 'services', 'msg' => 'ILLEGAL')));
+            // termina la mano
+            // ATENTO QUE SI EL JUGADOR NO ESTÁ CONECTADO NO RESPONDE EL PONG Y NO SE EMPIEZA NUEVA MANO *****************************************
+            if($msg == 'pong' && self::$eom)
+            {
+                self::$eom = false;
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'clients', 'data' => json_encode(self::getClients()))));
+                self::Resend(json_encode(array('type' => 'system', 'msg' => 'reboot')));
+                self::nuevaMano();
+            } else {
+                PHPSocketMaster\ServerManager::SendTo($idsocket, json_encode(array('type' => 'services', 'msg' => 'ILLEGAL')));
+            }
         }
         
     }
