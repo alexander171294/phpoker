@@ -251,7 +251,7 @@ class LittleDB
      }
     else
      {
-      $return = new \Framework\Query($query, $this->errors, $this->conn);
+      $return = new \Query($query, $this->errors, $this->conn);
       ++self::$count;
      }
     return $return;
@@ -280,7 +280,7 @@ class LittleDB
      {
       if($limit !== null && $limit > 1)
        {
-        return new \Framework\Query($cons, $this->errors, $this->conn);
+        return new \Query($cons, $this->errors, $this->conn);
         ++self::$count;
        }
       else

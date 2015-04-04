@@ -12,7 +12,7 @@
  define('REMOTE_HOST', 'localhost');
  define('REMOTE_USER', 'root');
  define('REMOTE_PASS', '');
- define('REMOTE_DB', '');
+ define('REMOTE_DB', 'phpoker');
 
 // example of websocket using directly SocketMaster
 
@@ -58,6 +58,11 @@ class ServerManager
 			}
 		}
 	}
+  
+  static public function getDB()
+  {
+      return self::$db;
+  }
 
 	static public function AddNewClient()
 	{
