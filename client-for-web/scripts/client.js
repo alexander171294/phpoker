@@ -226,7 +226,12 @@ function mainExec(host, port)
                     
                     if(msg.msg == 'ILLEGAL')
                     {
-                        alert('ACCIÓN ILEGAL!');
+                        accionilegal();
+                    }
+                    
+                    if(msg.msg == 'FullTable')
+                    {
+                        mesallena();
                     }
                 }
             }
@@ -736,4 +741,14 @@ function afk(target)
 function recon(target)
 {
     $('#vcard'+target).removeClass('afk');
+}
+
+function accionilegal()
+{
+  alert('ACCIÓN ILEGAL!');
+}
+
+function mesallena()
+{
+  alert('La mesa se encuentra completa');
 }
