@@ -4,9 +4,15 @@
  * @wiki https://github.com/alexander171294/PHPSocketMaster/wiki/PHPSocketMaster-como-WebSocket
  */
  
- define('LOCAL_IP', '127.0.0.1');
+ define('LOCAL_IP', '192.168.0.101');
  define('LOCAL_PORT', '6768');
  define('LOCAL_PING', true); // permitimos que el server envíe pings para saber si el cliente está online
+ 
+ // DATABASE SERVER
+ define('REMOTE_HOST', 'localhost');
+ define('REMOTE_USER', 'root');
+ define('REMOTE_PASS', '');
+ define('REMOTE_DB', '');
 
 // example of websocket using directly SocketMaster
 
@@ -14,6 +20,8 @@ require('config.php');
 \config::loadConfig();
 require('CorePoker.php');
 require('sockets/iSocketMaster.php');
+require('db/littledb.php');
+
 
 // import implementation of SocketMaster as Socket
 include('Listen.php');
@@ -25,13 +33,16 @@ class ServerManager
 	static private $sock = null;
 	static private $clients = array(); // array of clients online
 	static private $NewClient = null;
+  static private $db = null;
 
 	static public function start()
 	{
 		// create a new socket
 		self::$sock = new Socket(LOCAL_IP, LOCAL_PORT);
 
-		self::$sock->listen(); 
+		self::$sock->listen();
+    
+    self::$db = new LittleDB(REMOTE_HOST, REMOTE_USER, REMOTE_PASS, REMOTE_DB); 
 
 		echo '** listen **';
 
