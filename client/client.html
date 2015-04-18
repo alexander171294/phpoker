@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1250">
+    <meta name="generator" content="PHPoker">
+    <title>PHP Poker client v2</title>
+    <link href="css/home.css" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="scripts/client-main.js"></script>
+    <script src="scripts/tools.js"></script>
+    <script src="scripts/click_event.js"></script>
+    
+  </head>
+  <body>
+  
+     <div id="blacky"></div>
+     
+     <div id="conexion"><img src="images/load.gif" id="loader" /><p id="con-msg">Conectando al servidor...</p></div>
+     
+     <div id="headerlogo"><div id="solapa"></div> <div id="logon">Mi Servidor</div> <div class="versionText"> Client version: 1.0.1 </div></div>
+   
+   
+     <div id="registro">
+        <div class="center black-inp"><div class="inner-inp"> <input type="text" placeholder="Email" class="txt-inp"/> </div></div>
+        <div class="center black-inp"><div class="inner-inp"> <input type="text" placeholder="Usuario" class="txt-inp"/> </div></div>
+        <div class="center black-inp"><div class="inner-inp"> <input type="text" placeholder="Contrase&ntilde;a" class="txt-inp"/> </div></div>
+        <div class="center black-btn2"><div class="inner-btn2"><div class="oranger-btn2"> <div class="sombra-btn2"></div> <div class="text-btn2">Registrarme</div> </div></div></div>
+        <div class="center black-circ" id="openreg"><div class="inner-circ"><div class="text-circ">&#x25BC;</div></div></div>
+        <div class="center black-circ2" id="closereg"><div class="inner-circ2"><div class="oranger-circ2"> <div class="sombra-circ2"></div><div class="text-circ2">&#x25B2;</div></div></div></div>
+        <div class="registerText"> Registrate! </div>
+     </div>
+     
+     <div id="login">
+        <div class="center black-inp" style="margin-top: 27px;"><div class="inner-inp"> <input type="text" placeholder="Usuario" class="txt-inp" id="login_usr"/> </div></div>  
+        
+        <div class="center black-inp"><div class="inner-inp"> <input type="text" placeholder="Contrase&ntilde;a" class="txt-inp" id="login_pass"/> </div></div> 
+        
+        <div class="center black-btn"><div class="inner-btn"><div class="oranger-btn"> <div class="sombra-btn"></div> <div class="text-btn" id="login_ingresar">Entrar</div> </div></div></div>  
+     </div>
+     
+     <div id="menu">
+        <div id="profile">
+            <div class="img_profile"><img src="images/sinfoto.png" class="profimg"/> <div class="nickText" id="nick"> Alexander </div></div>
+        </div>
+        <div class="fnd_menu">
+        <div class="blk_menu">
+          <ul class="main_menu">
+              <li class="menu_top menuactive"><div class="sombra-qt"></div> Novedades</li>
+              
+              <li class="menu_mid"><div class="sombra-qt"></div> Cuenta</li>
+              
+              <li class="menu_mid"><div class="sombra-qt"></div> Mesas</li>
+              
+              <li class="menu_bot"><div class="sombra-qt"></div> Desconectarse</li>
+          </ul>  
+        </div>
+        </div>
+     </div>    
+     
+     <!-- 
+     <div class="black-btn"><div class="inner-btn"><div class="oranger-btn"> <div class="sombra-btn"></div> <div class="text-btn">Aceptar</div> </div></div></div>
+                                                                                   
+     <div class="black-btn2"><div class="inner-btn2"><div class="oranger-btn2"> <div class="sombra-btn2"></div> <div class="text-btn2">Descargar!</div> </div></div></div>
+         
+     <div class="black-inp"><div class="inner-inp"> <input type="text" placeholder="test" class="txt-inp"/> </div></div>
+      -->
+     
+  </body>
+  
+</html>
