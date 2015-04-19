@@ -18,31 +18,32 @@
 abstract class SocketEventReceptor
 {
   use timeOut;
-	/**
-	 * Var $bridge
-	 * @var object instance of SocketBridge
-	 * contiene la instancia del puente, para poder ejecutar
-	 * acciones sobre el socket, cuando ocurre un evento.
-	 */
-	private $bridge = null;
+  
+  /**
+	* Var $bridge
+	* @var object instance of SocketBridge
+	* contiene la instancia del puente, para poder ejecutar
+	* acciones sobre el socket, cuando ocurre un evento.
+	*/
+  private $bridge = null;
 
 	/**
 	 * Function setMother
 	 * @param SocketBridge $bridge
 	 * @return none
 	 */
-	final public function setMother(SocketBridge &$bridge)
-	{
-		$this->bridge = $bridge;
-	}
+  final public function setMother(SocketBridge &$bridge)
+  {
+	  $this->bridge = $bridge;
+  }
 
-	/**
-	 * Function Getter getBridge
-	 * @return object instance of SocketBridge
-	 * function diseñada para obtener la instancia del puente
-	 * de forma que se puedan ejecutar acciones sobre el socket.
-	 */
-	final public function getBridge() { return $this->bridge; }
+  /**
+	* Function Getter getBridge
+	* @return object instance of SocketBridge
+	* function diseñada para obtener la instancia del puente
+	* de forma que se puedan ejecutar acciones sobre el socket.
+	*/
+  final public function getBridge() { return $this->bridge; }
   
   // reescritura de métodos de socketmaster pero para el puente
   final public function send($msg) 
@@ -54,14 +55,19 @@ abstract class SocketEventReceptor
       $this->getBridge()->disconnect();
   }
   // fin de reescritura de métodos de socketmaster
+  
+  final public function isWebSocket()
+  {
+	return !$this->getBridge()->nsocket;
+  }
 
-	/**
-	 * Abstract Functions overwritables
-	 */
-	abstract public function onError();
-	abstract public function onConnect();
-	abstract public function onDisconnect();
-	abstract public function onReceiveMessage($message);
+  /**
+   * Abstract Functions overwritables
+   */
+  abstract public function onError();
+  abstract public function onConnect();
+  abstract public function onDisconnect();
+  abstract public function onReceiveMessage($message);
     
   abstract public function onSendRequest(&$cancel, $message);
   abstract public function onSendComplete($message);

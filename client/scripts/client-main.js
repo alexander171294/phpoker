@@ -24,7 +24,6 @@ function connect()
         // log de errores
         websocket.onerror = function(ev)
         {
-            alert('Internal Client Error');
             reconnect();
             console.log(ev.data);
         }
@@ -53,6 +52,5 @@ function procesar(ev)
 
 function sck_enviar(msg)
 {
-    alert(msg);
-    websocket.send(msg);
+    websocket.send('client@'+msg);
 }

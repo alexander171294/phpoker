@@ -4,7 +4,7 @@
 class DualSocketBridge extends SocketBridge implements iDualSocketBridge
 {
 	private $SendHandshake = false;
-	private $nsocket = false;
+	protected $nsocket = false;
 	private $magicString = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 	
 	public function __construct($socket, SocketEventReceptor &$callback, $address = null, $port = 0) 
@@ -237,5 +237,7 @@ class DualSocketBridge extends SocketBridge implements iDualSocketBridge
 		}
 		return $out;
 	}
+	
+	final public function get_nsocket() { return $this->nsocket; }
 	
 }

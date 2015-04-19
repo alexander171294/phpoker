@@ -8,6 +8,6 @@ $(document).ready(function(){
         });   
         
         $('#login_ingresar').click(function(){
-            sck_enviar($('#login_usr').val()+'@'+$('#login_pass').val());
+            sck_enviar('login@'+$('#login_usr').val()+'@'+$('#login_pass').val());
         });         
 });

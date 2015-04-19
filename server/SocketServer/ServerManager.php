@@ -92,7 +92,7 @@ abstract class ServerManager
 		      self::$clients[count(self::$clients)] = $sock;
       }
       // llamamos al onready desde acá si no estamos usando websockets
-      if(!defined('SRV_WSK'))
+      if(!defined('SRV_WSK') && !defined('SRV_DUAL'))
           $sock->SocketEventReceptor->onReady();
       // si estamos usando websockets tenemos que llamarlo directamente desde la segunda 
       // ejecución del evento onConnect

@@ -16,7 +16,7 @@ abstract class SocketClient extends \PHPSocketMaster\SocketEventReceptor
     {
         if($this->firstExecution) $this->firstExecution = false;
         else {
-            if(defined('SRV_WSK'))
+            if(defined('SRV_WSK') || defined('SRV_DUAL'))
             {
                 $this->onReady();
             }

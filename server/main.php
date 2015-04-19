@@ -6,8 +6,8 @@ define('SRV_MGR', 'Administrador');
 // requerimos PHPSocketMaster
 require('SocketMaster/iSocketMaster.php');
 
-// activamos websocket
-define('SRV_WSK', true);
+// activamos DUALsocket
+define('SRV_DUAL', true);
 
 // requerimos ServerManager
 require('SocketServer/ServerManager.php');
